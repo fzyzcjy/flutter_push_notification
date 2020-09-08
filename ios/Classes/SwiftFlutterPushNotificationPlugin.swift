@@ -22,7 +22,7 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
         instance = newInstance
     }
     
-    public func iosRegister(forRemoteNotifications error: AutoreleasingUnsafeMutablePointer<FlutterError?>) {
+    public func iosRegister(_ error: AutoreleasingUnsafeMutablePointer<FlutterError?>) {
         NSLog("iosRegister start")
         
         if #available(iOS 10.0, *) {
@@ -47,21 +47,22 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
     // TODO 写文档解释，必须在主程序的AppDelegate.swift中加一行调用这个的
     public static func hack_application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         NSLog("didRegisterForRemoteNotificationsWithDeviceToken deviceToken=\(deviceToken)")
-        
         // https://stackoverflow.com/a/24979958/4619958
         let deviceTokenStr = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         
-        let r = FPNIosDidRegisterRequest()
+        let r = FPNIosDidRegisterCallbackArg()
+        r.success = true
         r.deviceToken = deviceTokenStr
-        instance!.flutterApi.iosDidRegister(r, completion: {e in })
+        instance!.flutterApi.iosRegisterCallback(r, completion: {e in })
     }
     
     // TODO 写文档解释，必须在主程序的AppDelegate.swift中加一行调用这个的
     public static func hack_application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         NSLog("didFailToRegisterForRemoteNotificationsWithError \(error)")
-        let r = FPNIosFailRegisterRequest()
-        r.error = "\(error)"
-        instance!.flutterApi.iosFailedRegister(r, completion: {e in })
+        let r = FPNIosDidRegisterCallbackArg()
+        r.success = false
+        r.errorMessage = "\(error)"
+        instance!.flutterApi.iosRegisterCallback(r, completion: {e in })
     }
     
 }

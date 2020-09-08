@@ -7,26 +7,22 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class FPNIosDidRegisterRequest;
-@class FPNIosFailRegisterRequest;
+@class FPNIosDidRegisterCallbackArg;
 
-@interface FPNIosDidRegisterRequest : NSObject
+@interface FPNIosDidRegisterCallbackArg : NSObject
+@property(nonatomic, strong, nullable) NSNumber * success;
 @property(nonatomic, copy, nullable) NSString * deviceToken;
-@end
-
-@interface FPNIosFailRegisterRequest : NSObject
-@property(nonatomic, copy, nullable) NSString * error;
+@property(nonatomic, copy, nullable) NSString * errorMessage;
 @end
 
 @protocol FPNFlutterPushNotificationHostApi
--(void)iosRegisterForRemoteNotifications:(FlutterError *_Nullable *_Nonnull)error;
+-(void)iosRegister:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, id<FPNFlutterPushNotificationHostApi> _Nullable api);
 
 @interface FPNFlutterPushNotificationFlutterApi : NSObject
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
-- (void)iosDidRegister:(FPNIosDidRegisterRequest*)input completion:(void(^)(NSError* _Nullable))completion;
-- (void)iosFailedRegister:(FPNIosFailRegisterRequest*)input completion:(void(^)(NSError* _Nullable))completion;
+- (void)iosRegisterCallback:(FPNIosDidRegisterCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion;
 @end
 NS_ASSUME_NONNULL_END

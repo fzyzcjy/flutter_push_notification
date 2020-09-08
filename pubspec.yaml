@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   permission_handler: ^5.0.0
+  pedantic: ^1.8.0
 
 dev_dependencies:
   flutter_test:

@@ -4,48 +4,35 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 
-class IosDidRegisterRequest {
+class IosDidRegisterCallbackArg {
+  bool success;
   String deviceToken;
+  String errorMessage;
   // ignore: unused_element
   Map<dynamic, dynamic> _toMap() {
     final Map<dynamic, dynamic> pigeonMap = <dynamic, dynamic>{};
+    pigeonMap['success'] = success;
     pigeonMap['deviceToken'] = deviceToken;
+    pigeonMap['errorMessage'] = errorMessage;
     return pigeonMap;
   }
   // ignore: unused_element
-  static IosDidRegisterRequest _fromMap(Map<dynamic, dynamic> pigeonMap) {
+  static IosDidRegisterCallbackArg _fromMap(Map<dynamic, dynamic> pigeonMap) {
     if (pigeonMap == null){
       return null;
     }
-    final IosDidRegisterRequest result = IosDidRegisterRequest();
+    final IosDidRegisterCallbackArg result = IosDidRegisterCallbackArg();
+    result.success = pigeonMap['success'];
     result.deviceToken = pigeonMap['deviceToken'];
-    return result;
-  }
-}
-
-class IosFailRegisterRequest {
-  String error;
-  // ignore: unused_element
-  Map<dynamic, dynamic> _toMap() {
-    final Map<dynamic, dynamic> pigeonMap = <dynamic, dynamic>{};
-    pigeonMap['error'] = error;
-    return pigeonMap;
-  }
-  // ignore: unused_element
-  static IosFailRegisterRequest _fromMap(Map<dynamic, dynamic> pigeonMap) {
-    if (pigeonMap == null){
-      return null;
-    }
-    final IosFailRegisterRequest result = IosFailRegisterRequest();
-    result.error = pigeonMap['error'];
+    result.errorMessage = pigeonMap['errorMessage'];
     return result;
   }
 }
 
 class FlutterPushNotificationHostApi {
-  Future<void> iosRegisterForRemoteNotifications() async {
+  Future<void> iosRegister() async {
     const BasicMessageChannel<dynamic> channel =
-        BasicMessageChannel<dynamic>('dev.flutter.pigeon.FlutterPushNotificationHostApi.iosRegisterForRemoteNotifications', StandardMessageCodec());
+        BasicMessageChannel<dynamic>('dev.flutter.pigeon.FlutterPushNotificationHostApi.iosRegister', StandardMessageCodec());
     
     final Map<dynamic, dynamic> replyMap = await channel.send(null);
     if (replyMap == null) {
@@ -67,25 +54,15 @@ class FlutterPushNotificationHostApi {
 }
 
 abstract class FlutterPushNotificationFlutterApi {
-  void iosDidRegister(IosDidRegisterRequest arg);
-  void iosFailedRegister(IosFailRegisterRequest arg);
+  void iosRegisterCallback(IosDidRegisterCallbackArg arg);
   static void setup(FlutterPushNotificationFlutterApi api) {
     {
       const BasicMessageChannel<dynamic> channel =
-          BasicMessageChannel<dynamic>('dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosDidRegister', StandardMessageCodec());
+          BasicMessageChannel<dynamic>('dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosRegisterCallback', StandardMessageCodec());
       channel.setMessageHandler((dynamic message) async {
         final Map<dynamic, dynamic> mapMessage = message as Map<dynamic, dynamic>;
-        final IosDidRegisterRequest input = IosDidRegisterRequest._fromMap(mapMessage);
-        api.iosDidRegister(input);
-      });
-    }
-    {
-      const BasicMessageChannel<dynamic> channel =
-          BasicMessageChannel<dynamic>('dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosFailedRegister', StandardMessageCodec());
-      channel.setMessageHandler((dynamic message) async {
-        final Map<dynamic, dynamic> mapMessage = message as Map<dynamic, dynamic>;
-        final IosFailRegisterRequest input = IosFailRegisterRequest._fromMap(mapMessage);
-        api.iosFailedRegister(input);
+        final IosDidRegisterCallbackArg input = IosDidRegisterCallbackArg._fromMap(mapMessage);
+        api.iosRegisterCallback(input);
       });
     }
   }

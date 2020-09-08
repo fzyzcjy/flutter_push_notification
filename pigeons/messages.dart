@@ -1,23 +1,19 @@
 import 'package:pigeon/pigeon_lib.dart';
 
-class IosDidRegisterRequest {
+class IosDidRegisterCallbackArg {
+  bool success;
   String deviceToken;
-}
-
-class IosFailRegisterRequest {
-  String error;
+  String errorMessage;
 }
 
 @HostApi()
 abstract class FlutterPushNotificationHostApi {
-  void iosRegisterForRemoteNotifications();
+  void iosRegister();
 }
 
 @FlutterApi()
 abstract class FlutterPushNotificationFlutterApi {
-  void iosDidRegister(IosDidRegisterRequest request);
-
-  void iosFailedRegister(IosFailRegisterRequest request);
+  void iosRegisterCallback(IosDidRegisterCallbackArg arg);
 }
 
 void configurePigeon(PigeonOptions opts) {

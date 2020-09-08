@@ -22,40 +22,30 @@ static NSDictionary* wrapResult(NSDictionary *result, FlutterError *error) {
       nil];
 }
 
-@interface FPNIosDidRegisterRequest ()
-+(FPNIosDidRegisterRequest*)fromMap:(NSDictionary*)dict;
--(NSDictionary*)toMap;
-@end
-@interface FPNIosFailRegisterRequest ()
-+(FPNIosFailRegisterRequest*)fromMap:(NSDictionary*)dict;
+@interface FPNIosDidRegisterCallbackArg ()
++(FPNIosDidRegisterCallbackArg*)fromMap:(NSDictionary*)dict;
 -(NSDictionary*)toMap;
 @end
 
-@implementation FPNIosDidRegisterRequest
-+(FPNIosDidRegisterRequest*)fromMap:(NSDictionary*)dict {
-  FPNIosDidRegisterRequest* result = [[FPNIosDidRegisterRequest alloc] init];
+@implementation FPNIosDidRegisterCallbackArg
++(FPNIosDidRegisterCallbackArg*)fromMap:(NSDictionary*)dict {
+  FPNIosDidRegisterCallbackArg* result = [[FPNIosDidRegisterCallbackArg alloc] init];
+  result.success = dict[@"success"];
+  if ((NSNull *)result.success == [NSNull null]) {
+    result.success = nil;
+  }
   result.deviceToken = dict[@"deviceToken"];
   if ((NSNull *)result.deviceToken == [NSNull null]) {
     result.deviceToken = nil;
   }
-  return result;
-}
--(NSDictionary*)toMap {
-  return [NSDictionary dictionaryWithObjectsAndKeys:(self.deviceToken ? self.deviceToken : [NSNull null]), @"deviceToken", nil];
-}
-@end
-
-@implementation FPNIosFailRegisterRequest
-+(FPNIosFailRegisterRequest*)fromMap:(NSDictionary*)dict {
-  FPNIosFailRegisterRequest* result = [[FPNIosFailRegisterRequest alloc] init];
-  result.error = dict[@"error"];
-  if ((NSNull *)result.error == [NSNull null]) {
-    result.error = nil;
+  result.errorMessage = dict[@"errorMessage"];
+  if ((NSNull *)result.errorMessage == [NSNull null]) {
+    result.errorMessage = nil;
   }
   return result;
 }
 -(NSDictionary*)toMap {
-  return [NSDictionary dictionaryWithObjectsAndKeys:(self.error ? self.error : [NSNull null]), @"error", nil];
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.success ? self.success : [NSNull null]), @"success", (self.deviceToken ? self.deviceToken : [NSNull null]), @"deviceToken", (self.errorMessage ? self.errorMessage : [NSNull null]), @"errorMessage", nil];
 }
 @end
 
@@ -63,12 +53,12 @@ void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> binaryMes
   {
     FlutterBasicMessageChannel *channel =
       [FlutterBasicMessageChannel
-        messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationHostApi.iosRegisterForRemoteNotifications"
+        messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationHostApi.iosRegister"
         binaryMessenger:binaryMessenger];
     if (api) {
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         FlutterError *error;
-        [api iosRegisterForRemoteNotifications:&error];
+        [api iosRegister:&error];
         callback(wrapResult(nil, error));
       }];
     }
@@ -90,20 +80,10 @@ void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> binaryMes
   return self;
 }
 
-- (void)iosDidRegister:(FPNIosDidRegisterRequest*)input completion:(void(^)(NSError* _Nullable))completion {
+- (void)iosRegisterCallback:(FPNIosDidRegisterCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
-      messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosDidRegister"
-      binaryMessenger:self.binaryMessenger];
-  NSDictionary* inputMap = [input toMap];
-  [channel sendMessage:inputMap reply:^(id reply) {
-    completion(nil);
-  }];
-}
-- (void)iosFailedRegister:(FPNIosFailRegisterRequest*)input completion:(void(^)(NSError* _Nullable))completion {
-  FlutterBasicMessageChannel *channel =
-    [FlutterBasicMessageChannel
-      messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosFailedRegister"
+      messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosRegisterCallback"
       binaryMessenger:self.binaryMessenger];
   NSDictionary* inputMap = [input toMap];
   [channel sendMessage:inputMap reply:^(id reply) {
