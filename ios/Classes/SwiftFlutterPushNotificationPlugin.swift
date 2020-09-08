@@ -33,7 +33,7 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
     }
     
     // TODO 写文档解释，必须在主程序的AppDelegate.swift中加一行调用这个的
-    static func hack_application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+    public static func hack_application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         instance!.flutterApi.iosFailedRegister({e in })
     }
     
