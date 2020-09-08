@@ -26,18 +26,36 @@ static NSDictionary* wrapResult(NSDictionary *result, FlutterError *error) {
 +(FPNIosDidRegisterRequest*)fromMap:(NSDictionary*)dict;
 -(NSDictionary*)toMap;
 @end
+@interface FPNIosFailRegisterRequest ()
++(FPNIosFailRegisterRequest*)fromMap:(NSDictionary*)dict;
+-(NSDictionary*)toMap;
+@end
 
 @implementation FPNIosDidRegisterRequest
 +(FPNIosDidRegisterRequest*)fromMap:(NSDictionary*)dict {
   FPNIosDidRegisterRequest* result = [[FPNIosDidRegisterRequest alloc] init];
-  result.deviceTokenBase64 = dict[@"deviceTokenBase64"];
-  if ((NSNull *)result.deviceTokenBase64 == [NSNull null]) {
-    result.deviceTokenBase64 = nil;
+  result.deviceToken = dict[@"deviceToken"];
+  if ((NSNull *)result.deviceToken == [NSNull null]) {
+    result.deviceToken = nil;
   }
   return result;
 }
 -(NSDictionary*)toMap {
-  return [NSDictionary dictionaryWithObjectsAndKeys:(self.deviceTokenBase64 ? self.deviceTokenBase64 : [NSNull null]), @"deviceTokenBase64", nil];
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.deviceToken ? self.deviceToken : [NSNull null]), @"deviceToken", nil];
+}
+@end
+
+@implementation FPNIosFailRegisterRequest
++(FPNIosFailRegisterRequest*)fromMap:(NSDictionary*)dict {
+  FPNIosFailRegisterRequest* result = [[FPNIosFailRegisterRequest alloc] init];
+  result.error = dict[@"error"];
+  if ((NSNull *)result.error == [NSNull null]) {
+    result.error = nil;
+  }
+  return result;
+}
+-(NSDictionary*)toMap {
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.error ? self.error : [NSNull null]), @"error", nil];
 }
 @end
 
@@ -82,12 +100,13 @@ void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> binaryMes
     completion(nil);
   }];
 }
-- (void)iosFailedRegister:(void(^)(NSError* _Nullable))completion {
+- (void)iosFailedRegister:(FPNIosFailRegisterRequest*)input completion:(void(^)(NSError* _Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosFailedRegister"
       binaryMessenger:self.binaryMessenger];
-  [channel sendMessage:nil reply:^(id reply) {
+  NSDictionary* inputMap = [input toMap];
+  [channel sendMessage:inputMap reply:^(id reply) {
     completion(nil);
   }];
 }

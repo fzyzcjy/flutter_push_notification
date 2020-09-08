@@ -15,19 +15,38 @@ public class Messages {
 
   /** Generated class from Pigeon that represents data sent in messages. */
   public static class IosDidRegisterRequest {
-    private String deviceTokenBase64;
-    public String getDeviceTokenBase64() { return deviceTokenBase64; }
-    public void setDeviceTokenBase64(String setterArg) { this.deviceTokenBase64 = setterArg; }
+    private String deviceToken;
+    public String getDeviceToken() { return deviceToken; }
+    public void setDeviceToken(String setterArg) { this.deviceToken = setterArg; }
 
     HashMap toMap() {
       HashMap<String, Object> toMapResult = new HashMap<>();
-      toMapResult.put("deviceTokenBase64", deviceTokenBase64);
+      toMapResult.put("deviceToken", deviceToken);
       return toMapResult;
     }
     static IosDidRegisterRequest fromMap(HashMap map) {
       IosDidRegisterRequest fromMapResult = new IosDidRegisterRequest();
-      Object deviceTokenBase64 = map.get("deviceTokenBase64");
-      fromMapResult.deviceTokenBase64 = (String)deviceTokenBase64;
+      Object deviceToken = map.get("deviceToken");
+      fromMapResult.deviceToken = (String)deviceToken;
+      return fromMapResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
+  public static class IosFailRegisterRequest {
+    private String error;
+    public String getError() { return error; }
+    public void setError(String setterArg) { this.error = setterArg; }
+
+    HashMap toMap() {
+      HashMap<String, Object> toMapResult = new HashMap<>();
+      toMapResult.put("error", error);
+      return toMapResult;
+    }
+    static IosFailRegisterRequest fromMap(HashMap map) {
+      IosFailRegisterRequest fromMapResult = new IosFailRegisterRequest();
+      Object error = map.get("error");
+      fromMapResult.error = (String)error;
       return fromMapResult;
     }
   }
@@ -77,10 +96,11 @@ public class Messages {
         callback.reply(null);
       });
     }
-    public void iosFailedRegister(Reply<Void> callback) {
+    public void iosFailedRegister(IosFailRegisterRequest argInput, Reply<Void> callback) {
       BasicMessageChannel<Object> channel =
           new BasicMessageChannel<>(binaryMessenger, "dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosFailedRegister", new StandardMessageCodec());
-      channel.send(null, channelReply -> {
+      HashMap inputMap = argInput.toMap();
+      channel.send(inputMap, channelReply -> {
         callback.reply(null);
       });
     }

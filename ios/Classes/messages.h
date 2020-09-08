@@ -8,9 +8,14 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class FPNIosDidRegisterRequest;
+@class FPNIosFailRegisterRequest;
 
 @interface FPNIosDidRegisterRequest : NSObject
-@property(nonatomic, copy, nullable) NSString * deviceTokenBase64;
+@property(nonatomic, copy, nullable) NSString * deviceToken;
+@end
+
+@interface FPNIosFailRegisterRequest : NSObject
+@property(nonatomic, copy, nullable) NSString * error;
 @end
 
 @protocol FPNFlutterPushNotificationHostApi
@@ -22,6 +27,6 @@ extern void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> bi
 @interface FPNFlutterPushNotificationFlutterApi : NSObject
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
 - (void)iosDidRegister:(FPNIosDidRegisterRequest*)input completion:(void(^)(NSError* _Nullable))completion;
-- (void)iosFailedRegister:(void(^)(NSError* _Nullable))completion;
+- (void)iosFailedRegister:(FPNIosFailRegisterRequest*)input completion:(void(^)(NSError* _Nullable))completion;
 @end
 NS_ASSUME_NONNULL_END

@@ -5,11 +5,11 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 
 class IosDidRegisterRequest {
-  String deviceTokenBase64;
+  String deviceToken;
   // ignore: unused_element
   Map<dynamic, dynamic> _toMap() {
     final Map<dynamic, dynamic> pigeonMap = <dynamic, dynamic>{};
-    pigeonMap['deviceTokenBase64'] = deviceTokenBase64;
+    pigeonMap['deviceToken'] = deviceToken;
     return pigeonMap;
   }
   // ignore: unused_element
@@ -18,7 +18,26 @@ class IosDidRegisterRequest {
       return null;
     }
     final IosDidRegisterRequest result = IosDidRegisterRequest();
-    result.deviceTokenBase64 = pigeonMap['deviceTokenBase64'];
+    result.deviceToken = pigeonMap['deviceToken'];
+    return result;
+  }
+}
+
+class IosFailRegisterRequest {
+  String error;
+  // ignore: unused_element
+  Map<dynamic, dynamic> _toMap() {
+    final Map<dynamic, dynamic> pigeonMap = <dynamic, dynamic>{};
+    pigeonMap['error'] = error;
+    return pigeonMap;
+  }
+  // ignore: unused_element
+  static IosFailRegisterRequest _fromMap(Map<dynamic, dynamic> pigeonMap) {
+    if (pigeonMap == null){
+      return null;
+    }
+    final IosFailRegisterRequest result = IosFailRegisterRequest();
+    result.error = pigeonMap['error'];
     return result;
   }
 }
@@ -49,7 +68,7 @@ class FlutterPushNotificationHostApi {
 
 abstract class FlutterPushNotificationFlutterApi {
   void iosDidRegister(IosDidRegisterRequest arg);
-  void iosFailedRegister();
+  void iosFailedRegister(IosFailRegisterRequest arg);
   static void setup(FlutterPushNotificationFlutterApi api) {
     {
       const BasicMessageChannel<dynamic> channel =
@@ -65,7 +84,8 @@ abstract class FlutterPushNotificationFlutterApi {
           BasicMessageChannel<dynamic>('dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosFailedRegister', StandardMessageCodec());
       channel.setMessageHandler((dynamic message) async {
         final Map<dynamic, dynamic> mapMessage = message as Map<dynamic, dynamic>;
-        api.iosFailedRegister();
+        final IosFailRegisterRequest input = IosFailRegisterRequest._fromMap(mapMessage);
+        api.iosFailedRegister(input);
       });
     }
   }

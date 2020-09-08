@@ -23,18 +23,45 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
     }
     
     public func iosRegister(forRemoteNotifications error: AutoreleasingUnsafeMutablePointer<FlutterError?>) {
-        UIApplication.shared.registerForRemoteNotifications()
+        NSLog("iosRegister start")
+        
+        if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, e in
+                NSLog("iosRegister callback of requestAuthorization")
+                if let e = e {
+                    error.pointee = FlutterError(code: "flutter_push_notification", message: "\(e.localizedDescription)", details: nil)
+                } else {
+                    // https://stackoverflow.com/questions/44391367/uiapplication-registerforremotenotifications-must-be-called-from-main-thread-o
+                    DispatchQueue.main.async {
+                        NSLog("iosRegister actually call registerForRemoteNotifications")
+                        UIApplication.shared.registerForRemoteNotifications()
+                    }
+                }
+            }
+        } else {
+            error.pointee = FlutterError(code: "flutter_push_notification", message: "iOS version is too old to call requestAuthorization", details: nil)
+            return
+        }
     }
     
-    public func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    // TODO 写文档解释，必须在主程序的AppDelegate.swift中加一行调用这个的
+    public static func hack_application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        NSLog("didRegisterForRemoteNotificationsWithDeviceToken deviceToken=\(deviceToken)")
+        
+        // https://stackoverflow.com/a/24979958/4619958
+        let deviceTokenStr = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
+        
         let r = FPNIosDidRegisterRequest()
-        r.deviceTokenBase64 = deviceToken.base64EncodedString()
-        flutterApi.iosDidRegister(r, completion: {e in })
+        r.deviceToken = deviceTokenStr
+        instance!.flutterApi.iosDidRegister(r, completion: {e in })
     }
     
     // TODO 写文档解释，必须在主程序的AppDelegate.swift中加一行调用这个的
     public static func hack_application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        instance!.flutterApi.iosFailedRegister({e in })
+        NSLog("didFailToRegisterForRemoteNotificationsWithError \(error)")
+        let r = FPNIosFailRegisterRequest()
+        r.error = "\(error)"
+        instance!.flutterApi.iosFailedRegister(r, completion: {e in })
     }
     
 }

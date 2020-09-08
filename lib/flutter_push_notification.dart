@@ -1,14 +1,40 @@
+import 'dart:io';
 
-import 'dart:async';
-
-import 'package:flutter/services.dart';
+import 'package:flutter_push_notification/src/messages.dart';
 
 class FlutterPushNotification {
-  static const MethodChannel _channel =
-      const MethodChannel('flutter_push_notification');
+  static _FlutterApiHandler _flutterApiHandler;
 
-  static Future<String> get platformVersion async {
-    final String version = await _channel.invokeMethod('getPlatformVersion');
-    return version;
+  final _hostApi = FlutterPushNotificationHostApi();
+
+  FlutterPushNotification() {
+    if (_flutterApiHandler == null) {
+      _flutterApiHandler = _FlutterApiHandler();
+      FlutterPushNotificationFlutterApi.setup(_flutterApiHandler);
+    }
+  }
+
+  void register() {
+    if (Platform.isIOS) {
+      // NOTE even if AWAIT for this method, the future completes does NOT mean the register FINISHES!
+      // thus DO NOT AWAIT this
+      _hostApi.iosRegisterForRemoteNotifications();
+      return;
+    }
+    throw Exception('unsupported platform');
+  }
+}
+
+class _FlutterApiHandler implements FlutterPushNotificationFlutterApi {
+  @override
+  void iosDidRegister(IosDidRegisterRequest arg) {
+    print('iosDidRegister deviceToken=${arg.deviceToken}');
+    // TODO
+  }
+
+  @override
+  void iosFailedRegister(IosFailRegisterRequest arg) {
+    print('iosFailedRegister ${arg.error}');
+    // TODO
   }
 }
