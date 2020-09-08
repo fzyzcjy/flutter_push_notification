@@ -27,15 +27,17 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
         
         if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, e in
-                NSLog("iosRegister callback of requestAuthorization")
-                if let e = e {
-                    error.pointee = FlutterError(code: "flutter_push_notification", message: "\(e.localizedDescription)", details: nil)
-                } else {
-                    // https://stackoverflow.com/questions/44391367/uiapplication-registerforremotenotifications-must-be-called-from-main-thread-o
+                NSLog("iosRegister callback of requestAuthorization \(granted) \(String(describing: e))")
+                if granted {
                     DispatchQueue.main.async {
                         NSLog("iosRegister actually call registerForRemoteNotifications")
                         UIApplication.shared.registerForRemoteNotifications()
                     }
+                } else {
+                    let r = FPNIosDidRegisterCallbackArg()
+                    r.success = false
+                    r.errorMessage = "Permission is not granted (with optional error: \(String(describing: e))"
+                    self.flutterApi.iosRegisterCallback(r, completion: {e in })
                 }
             }
         } else {

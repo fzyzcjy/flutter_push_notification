@@ -87,12 +87,13 @@ class _FlutterApiHandler implements FlutterPushNotificationFlutterApi {
   _IosDidRegisterCallback _onceIosRegisterCallback;
 
   set onceIosRegisterCallback(_IosDidRegisterCallback f) {
-    if (_onceIosRegisterCallback != null) print('WARN: onceIosRegisterCallback != null');
+    if (_onceIosRegisterCallback != null) print('WARN: onceIosRegisterCallback != null when set');
     _onceIosRegisterCallback = f;
   }
 
   @override
   void iosRegisterCallback(IosDidRegisterCallbackArg arg) {
+    if (_onceIosRegisterCallback == null) print('WARN: onceIosRegisterCallback == null when iosRegisterCallback');
     _onceIosRegisterCallback?.call(arg);
     _onceIosRegisterCallback = null;
   }
