@@ -4,30 +4,30 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_push_notification/src/messages.dart';
 
-class PushPlatformNames {
-  static const APNS = 'apns';
+enum PushPlatform {
+  APNS,
 }
 
 @immutable
-class DeviceToken {
-  final String platformName;
+class PushDevice {
+  final PushPlatform platform;
   final String deviceToken;
 
-  DeviceToken({this.platformName, this.deviceToken});
+  PushDevice({this.platform, this.deviceToken});
 
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is DeviceToken &&
+      other is PushDevice &&
           runtimeType == other.runtimeType &&
-          platformName == other.platformName &&
+          platform == other.platform &&
           deviceToken == other.deviceToken;
 
   @override
-  int get hashCode => platformName.hashCode ^ deviceToken.hashCode;
+  int get hashCode => platform.hashCode ^ deviceToken.hashCode;
 
   @override
-  String toString() => 'DeviceToken{platformName: $platformName, deviceToken: $deviceToken}';
+  String toString() => 'DeviceToken{platform: $platform, deviceToken: $deviceToken}';
 }
 
 _FlutterApiHandler _flutterApiHandler;
@@ -48,14 +48,14 @@ abstract class FlutterPushNotification {
     }
   }
 
-  Future<DeviceToken> register();
+  Future<PushDevice> register();
 }
 
 class _AndroidFlutterPushNotification extends FlutterPushNotification {
   _AndroidFlutterPushNotification() : super._();
 
   @override
-  Future<DeviceToken> register() {
+  Future<PushDevice> register() {
     // TODO: implement register
     throw UnimplementedError();
   }
@@ -65,12 +65,12 @@ class _IOSFlutterPushNotification extends FlutterPushNotification {
   _IOSFlutterPushNotification() : super._();
 
   @override
-  Future<DeviceToken> register() {
-    final completer = Completer<DeviceToken>();
+  Future<PushDevice> register() {
+    final completer = Completer<PushDevice>();
 
     _flutterApiHandler.onceIosRegisterCallback = (arg) {
       if (arg.success) {
-        completer.complete(DeviceToken(platformName: PushPlatformNames.APNS, deviceToken: arg.deviceToken));
+        completer.complete(PushDevice(platform: PushPlatform.APNS, deviceToken: arg.deviceToken));
       } else {
         completer.completeError(Exception(arg.errorMessage));
       }
