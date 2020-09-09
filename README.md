@@ -1,15 +1,34 @@
-# flutter_push_notification
+# FlutterPushNotification 混合推送（安卓6个厂商推送 + 苹果APNs）
 
-A new flutter plugin project.
+### Setup
 
-## Getting Started
+### Android
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+【TODO】
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### iOS
+
+1. In your `AppDelegate.swift`, add the following lines
+
+```
+// 1. add the import at the top
+import flutter_push_notification
+
+@UIApplicationMain
+@objc class AppDelegate: FlutterAppDelegate {
+  
+    ...
+    
+    // 2. inside AppDelegate, forward these two functions to our plugin
+    override func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+        SwiftFlutterPushNotificationPlugin.hack_application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+    }
+    override func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
+        SwiftFlutterPushNotificationPlugin.hack_application(application, didFailToRegisterForRemoteNotificationsWithError: error)
+    }
+}
+
+```
 

@@ -3,9 +3,18 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_push_notification/src/messages.dart';
+import 'package:flutter_push_notification/src/utils.dart';
 
 enum PushPlatform {
+  // ios
   APNS,
+
+  // android
+  MI,
+  HUAWEI,
+  MEIZU,
+  OPPO,
+  VIVO,
 }
 
 @immutable
@@ -48,16 +57,41 @@ abstract class FlutterPushNotification {
     }
   }
 
-  Future<PushDevice> register();
+  Future<PushDevice> register() {
+    final completer = Completer<PushDevice>();
+
+    _setUpRegisterCallback(completer);
+
+    // even if the hostApi's Future completes, the work is NOT done. Thus do not await this
+    _hostApi.triggerRegister().catchError(completer.completeError);
+
+    return completer.future;
+  }
+
+  void _setUpRegisterCallback(Completer<PushDevice> completer);
 }
 
 class _AndroidFlutterPushNotification extends FlutterPushNotification {
   _AndroidFlutterPushNotification() : super._();
 
   @override
-  Future<PushDevice> register() {
-    // TODO: implement register
-    throw UnimplementedError();
+  void _setUpRegisterCallback(Completer<PushDevice> completer) {
+    _flutterApiHandler._androidOnRegisterSucceedCallback.registerOnce((arg) {
+      completer.complete(PushDevice(platform: _convertPushPlatform(arg.platformName), deviceToken: arg.regId));
+    });
+  }
+
+  PushPlatform _convertPushPlatform(String mixPushPlatformName) {
+    const _MAP = {
+      'mi': PushPlatform.MI,
+      'huawei': PushPlatform.HUAWEI,
+      'oppo': PushPlatform.OPPO,
+      'vivo': PushPlatform.VIVO,
+      'meizu': PushPlatform.MEIZU,
+    };
+    if (!_MAP.containsKey(mixPushPlatformName))
+      throw Exception('_convertPushPlatform unknown platform: $mixPushPlatformName');
+    return _MAP[mixPushPlatformName];
   }
 }
 
@@ -65,38 +99,30 @@ class _IOSFlutterPushNotification extends FlutterPushNotification {
   _IOSFlutterPushNotification() : super._();
 
   @override
-  Future<PushDevice> register() {
-    final completer = Completer<PushDevice>();
-
-    _flutterApiHandler.onceIosRegisterCallback = (arg) {
+  void _setUpRegisterCallback(Completer<PushDevice> completer) {
+    _flutterApiHandler._iosRegisterCallback.registerOnce((arg) {
       if (arg.success) {
         completer.complete(PushDevice(platform: PushPlatform.APNS, deviceToken: arg.deviceToken));
       } else {
         completer.completeError(Exception(arg.errorMessage));
       }
-    };
-
-    // even if the hostApi's Future completes, the work is NOT done. Thus do not await for this
-    _hostApi.iosRegister().catchError(completer.completeError);
-
-    return completer.future;
+    });
   }
 }
 
 class _FlutterApiHandler implements FlutterPushNotificationFlutterApi {
-  _IosDidRegisterCallback _onceIosRegisterCallback;
-
-  set onceIosRegisterCallback(_IosDidRegisterCallback f) {
-    if (_onceIosRegisterCallback != null) print('WARN: onceIosRegisterCallback != null when set');
-    _onceIosRegisterCallback = f;
-  }
+  final _iosRegisterCallback = OnceFunction<IosRegisterCallbackArg>();
+  final _androidGetRegisterIdCallback = OnceFunction<AndroidGetRegisterIdCallbackArg>();
+  final _androidOnRegisterSucceedCallback = OnceFunction<AndroidOnRegisterSucceedCallbackArg>();
 
   @override
-  void iosRegisterCallback(IosDidRegisterCallbackArg arg) {
-    if (_onceIosRegisterCallback == null) print('WARN: onceIosRegisterCallback == null when iosRegisterCallback');
-    _onceIosRegisterCallback?.call(arg);
-    _onceIosRegisterCallback = null;
-  }
-}
+  void iosRegisterCallback(IosRegisterCallbackArg arg) => _iosRegisterCallback.callAndRemove(arg);
 
-typedef void _IosDidRegisterCallback(IosDidRegisterCallbackArg arg);
+  @override
+  void androidGetRegisterIdCallback(AndroidGetRegisterIdCallbackArg arg) =>
+      _androidGetRegisterIdCallback.callAndRemove(arg);
+
+  @override
+  void androidOnRegisterSucceedCallback(AndroidOnRegisterSucceedCallbackArg arg) =>
+      _androidOnRegisterSucceedCallback.callAndRemove(arg);
+}

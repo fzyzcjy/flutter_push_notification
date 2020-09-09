@@ -31,7 +31,7 @@ flutter:
   plugin:
     platforms:
       android:
-        package: com.example.flutter_push_notification
+        package: com.cjy.flutter_push_notification
         pluginClass: FlutterPushNotificationPlugin
       ios:
         pluginClass: FlutterPushNotificationPlugin

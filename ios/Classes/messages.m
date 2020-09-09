@@ -22,14 +22,22 @@ static NSDictionary* wrapResult(NSDictionary *result, FlutterError *error) {
       nil];
 }
 
-@interface FPNIosDidRegisterCallbackArg ()
-+(FPNIosDidRegisterCallbackArg*)fromMap:(NSDictionary*)dict;
+@interface FPNIosRegisterCallbackArg ()
++(FPNIosRegisterCallbackArg*)fromMap:(NSDictionary*)dict;
+-(NSDictionary*)toMap;
+@end
+@interface FPNAndroidOnRegisterSucceedCallbackArg ()
++(FPNAndroidOnRegisterSucceedCallbackArg*)fromMap:(NSDictionary*)dict;
+-(NSDictionary*)toMap;
+@end
+@interface FPNAndroidGetRegisterIdCallbackArg ()
++(FPNAndroidGetRegisterIdCallbackArg*)fromMap:(NSDictionary*)dict;
 -(NSDictionary*)toMap;
 @end
 
-@implementation FPNIosDidRegisterCallbackArg
-+(FPNIosDidRegisterCallbackArg*)fromMap:(NSDictionary*)dict {
-  FPNIosDidRegisterCallbackArg* result = [[FPNIosDidRegisterCallbackArg alloc] init];
+@implementation FPNIosRegisterCallbackArg
++(FPNIosRegisterCallbackArg*)fromMap:(NSDictionary*)dict {
+  FPNIosRegisterCallbackArg* result = [[FPNIosRegisterCallbackArg alloc] init];
   result.success = dict[@"success"];
   if ((NSNull *)result.success == [NSNull null]) {
     result.success = nil;
@@ -49,16 +57,72 @@ static NSDictionary* wrapResult(NSDictionary *result, FlutterError *error) {
 }
 @end
 
+@implementation FPNAndroidOnRegisterSucceedCallbackArg
++(FPNAndroidOnRegisterSucceedCallbackArg*)fromMap:(NSDictionary*)dict {
+  FPNAndroidOnRegisterSucceedCallbackArg* result = [[FPNAndroidOnRegisterSucceedCallbackArg alloc] init];
+  result.platformName = dict[@"platformName"];
+  if ((NSNull *)result.platformName == [NSNull null]) {
+    result.platformName = nil;
+  }
+  result.regId = dict[@"regId"];
+  if ((NSNull *)result.regId == [NSNull null]) {
+    result.regId = nil;
+  }
+  return result;
+}
+-(NSDictionary*)toMap {
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.platformName ? self.platformName : [NSNull null]), @"platformName", (self.regId ? self.regId : [NSNull null]), @"regId", nil];
+}
+@end
+
+@implementation FPNAndroidGetRegisterIdCallbackArg
++(FPNAndroidGetRegisterIdCallbackArg*)fromMap:(NSDictionary*)dict {
+  FPNAndroidGetRegisterIdCallbackArg* result = [[FPNAndroidGetRegisterIdCallbackArg alloc] init];
+  result.success = dict[@"success"];
+  if ((NSNull *)result.success == [NSNull null]) {
+    result.success = nil;
+  }
+  result.platformName = dict[@"platformName"];
+  if ((NSNull *)result.platformName == [NSNull null]) {
+    result.platformName = nil;
+  }
+  result.regId = dict[@"regId"];
+  if ((NSNull *)result.regId == [NSNull null]) {
+    result.regId = nil;
+  }
+  return result;
+}
+-(NSDictionary*)toMap {
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.success ? self.success : [NSNull null]), @"success", (self.platformName ? self.platformName : [NSNull null]), @"platformName", (self.regId ? self.regId : [NSNull null]), @"regId", nil];
+}
+@end
+
 void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, id<FPNFlutterPushNotificationHostApi> api) {
   {
     FlutterBasicMessageChannel *channel =
       [FlutterBasicMessageChannel
-        messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationHostApi.iosRegister"
+        messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationHostApi.triggerRegister"
         binaryMessenger:binaryMessenger];
     if (api) {
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         FlutterError *error;
-        [api iosRegister:&error];
+        [api triggerRegister:&error];
+        callback(wrapResult(nil, error));
+      }];
+    }
+    else {
+      [channel setMessageHandler:nil];
+    }
+  }
+  {
+    FlutterBasicMessageChannel *channel =
+      [FlutterBasicMessageChannel
+        messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationHostApi.androidGetRegisterId"
+        binaryMessenger:binaryMessenger];
+    if (api) {
+      [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
+        FlutterError *error;
+        [api androidGetRegisterId:&error];
         callback(wrapResult(nil, error));
       }];
     }
@@ -80,10 +144,30 @@ void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> binaryMes
   return self;
 }
 
-- (void)iosRegisterCallback:(FPNIosDidRegisterCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion {
+- (void)iosRegisterCallback:(FPNIosRegisterCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion {
   FlutterBasicMessageChannel *channel =
     [FlutterBasicMessageChannel
       messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationFlutterApi.iosRegisterCallback"
+      binaryMessenger:self.binaryMessenger];
+  NSDictionary* inputMap = [input toMap];
+  [channel sendMessage:inputMap reply:^(id reply) {
+    completion(nil);
+  }];
+}
+- (void)androidOnRegisterSucceedCallback:(FPNAndroidOnRegisterSucceedCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion {
+  FlutterBasicMessageChannel *channel =
+    [FlutterBasicMessageChannel
+      messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationFlutterApi.androidOnRegisterSucceedCallback"
+      binaryMessenger:self.binaryMessenger];
+  NSDictionary* inputMap = [input toMap];
+  [channel sendMessage:inputMap reply:^(id reply) {
+    completion(nil);
+  }];
+}
+- (void)androidGetRegisterIdCallback:(FPNAndroidGetRegisterIdCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion {
+  FlutterBasicMessageChannel *channel =
+    [FlutterBasicMessageChannel
+      messageChannelWithName:@"dev.flutter.pigeon.FlutterPushNotificationFlutterApi.androidGetRegisterIdCallback"
       binaryMessenger:self.binaryMessenger];
   NSDictionary* inputMap = [input toMap];
   [channel sendMessage:inputMap reply:^(id reply) {

@@ -7,22 +7,38 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class FPNIosDidRegisterCallbackArg;
+@class FPNIosRegisterCallbackArg;
+@class FPNAndroidOnRegisterSucceedCallbackArg;
+@class FPNAndroidGetRegisterIdCallbackArg;
 
-@interface FPNIosDidRegisterCallbackArg : NSObject
+@interface FPNIosRegisterCallbackArg : NSObject
 @property(nonatomic, strong, nullable) NSNumber * success;
 @property(nonatomic, copy, nullable) NSString * deviceToken;
 @property(nonatomic, copy, nullable) NSString * errorMessage;
 @end
 
+@interface FPNAndroidOnRegisterSucceedCallbackArg : NSObject
+@property(nonatomic, copy, nullable) NSString * platformName;
+@property(nonatomic, copy, nullable) NSString * regId;
+@end
+
+@interface FPNAndroidGetRegisterIdCallbackArg : NSObject
+@property(nonatomic, strong, nullable) NSNumber * success;
+@property(nonatomic, copy, nullable) NSString * platformName;
+@property(nonatomic, copy, nullable) NSString * regId;
+@end
+
 @protocol FPNFlutterPushNotificationHostApi
--(void)iosRegister:(FlutterError *_Nullable *_Nonnull)error;
+-(void)triggerRegister:(FlutterError *_Nullable *_Nonnull)error;
+-(void)androidGetRegisterId:(FlutterError *_Nullable *_Nonnull)error;
 @end
 
 extern void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> binaryMessenger, id<FPNFlutterPushNotificationHostApi> _Nullable api);
 
 @interface FPNFlutterPushNotificationFlutterApi : NSObject
 - (instancetype)initWithBinaryMessenger:(id<FlutterBinaryMessenger>)binaryMessenger;
-- (void)iosRegisterCallback:(FPNIosDidRegisterCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion;
+- (void)iosRegisterCallback:(FPNIosRegisterCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion;
+- (void)androidOnRegisterSucceedCallback:(FPNAndroidOnRegisterSucceedCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion;
+- (void)androidGetRegisterIdCallback:(FPNAndroidGetRegisterIdCallbackArg*)input completion:(void(^)(NSError* _Nullable))completion;
 @end
 NS_ASSUME_NONNULL_END
