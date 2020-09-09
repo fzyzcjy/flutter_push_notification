@@ -14,6 +14,25 @@ import java.util.HashMap;
 public class Messages {
 
   /** Generated class from Pigeon that represents data sent in messages. */
+  public static class TriggerRegisterArg {
+    private String androidDefaultPlatform;
+    public String getAndroidDefaultPlatform() { return androidDefaultPlatform; }
+    public void setAndroidDefaultPlatform(String setterArg) { this.androidDefaultPlatform = setterArg; }
+
+    HashMap toMap() {
+      HashMap<String, Object> toMapResult = new HashMap<>();
+      toMapResult.put("androidDefaultPlatform", androidDefaultPlatform);
+      return toMapResult;
+    }
+    static TriggerRegisterArg fromMap(HashMap map) {
+      TriggerRegisterArg fromMapResult = new TriggerRegisterArg();
+      Object androidDefaultPlatform = map.get("androidDefaultPlatform");
+      fromMapResult.androidDefaultPlatform = (String)androidDefaultPlatform;
+      return fromMapResult;
+    }
+  }
+
+  /** Generated class from Pigeon that represents data sent in messages. */
   public static class IosRegisterCallbackArg {
     private Boolean success;
     public Boolean getSuccess() { return success; }
@@ -107,7 +126,7 @@ public class Messages {
 
   /** Generated interface from Pigeon that represents a handler of messages from Flutter.*/
   public interface FlutterPushNotificationHostApi {
-    void triggerRegister();
+    void triggerRegister(TriggerRegisterArg arg);
     void androidGetRegisterId();
 
     /** Sets up an instance of `FlutterPushNotificationHostApi` to handle messages through the `binaryMessenger` */
@@ -119,7 +138,9 @@ public class Messages {
           channel.setMessageHandler((message, reply) -> {
             HashMap<String, HashMap> wrapped = new HashMap<>();
             try {
-              api.triggerRegister();
+              @SuppressWarnings("ConstantConditions")
+              TriggerRegisterArg input = TriggerRegisterArg.fromMap((HashMap)message);
+              api.triggerRegister(input);
               wrapped.put("result", null);
             }
             catch (Exception exception) {

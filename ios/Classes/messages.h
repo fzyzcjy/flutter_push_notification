@@ -7,9 +7,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class FPNTriggerRegisterArg;
 @class FPNIosRegisterCallbackArg;
 @class FPNAndroidOnRegisterSucceedCallbackArg;
 @class FPNAndroidGetRegisterIdCallbackArg;
+
+@interface FPNTriggerRegisterArg : NSObject
+@property(nonatomic, copy, nullable) NSString * androidDefaultPlatform;
+@end
 
 @interface FPNIosRegisterCallbackArg : NSObject
 @property(nonatomic, strong, nullable) NSNumber * success;
@@ -29,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @protocol FPNFlutterPushNotificationHostApi
--(void)triggerRegister:(FlutterError *_Nullable *_Nonnull)error;
+-(void)triggerRegister:(FPNTriggerRegisterArg*)input error:(FlutterError *_Nullable *_Nonnull)error;
 -(void)androidGetRegisterId:(FlutterError *_Nullable *_Nonnull)error;
 @end
 

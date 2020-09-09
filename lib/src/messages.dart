@@ -4,6 +4,25 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
 
+class TriggerRegisterArg {
+  String androidDefaultPlatform;
+  // ignore: unused_element
+  Map<dynamic, dynamic> _toMap() {
+    final Map<dynamic, dynamic> pigeonMap = <dynamic, dynamic>{};
+    pigeonMap['androidDefaultPlatform'] = androidDefaultPlatform;
+    return pigeonMap;
+  }
+  // ignore: unused_element
+  static TriggerRegisterArg _fromMap(Map<dynamic, dynamic> pigeonMap) {
+    if (pigeonMap == null){
+      return null;
+    }
+    final TriggerRegisterArg result = TriggerRegisterArg();
+    result.androidDefaultPlatform = pigeonMap['androidDefaultPlatform'];
+    return result;
+  }
+}
+
 class IosRegisterCallbackArg {
   bool success;
   String deviceToken;
@@ -77,11 +96,12 @@ class AndroidGetRegisterIdCallbackArg {
 }
 
 class FlutterPushNotificationHostApi {
-  Future<void> triggerRegister() async {
+  Future<void> triggerRegister(TriggerRegisterArg arg) async {
+    final Map<dynamic, dynamic> requestMap = arg._toMap();
     const BasicMessageChannel<dynamic> channel =
         BasicMessageChannel<dynamic>('dev.flutter.pigeon.FlutterPushNotificationHostApi.triggerRegister', StandardMessageCodec());
     
-    final Map<dynamic, dynamic> replyMap = await channel.send(null);
+    final Map<dynamic, dynamic> replyMap = await channel.send(requestMap);
     if (replyMap == null) {
       throw PlatformException(
         code: 'channel-error',

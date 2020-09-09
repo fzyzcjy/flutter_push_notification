@@ -25,7 +25,9 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
         context = null
     }
 
-    override fun triggerRegister() {
+    override fun triggerRegister(arg: TriggerRegisterArg?) {
+        Log.i(TAG, "triggerRegister start")
+
         val mixPushClient = MixPushClient.getInstance()
 
         mixPushClient.setLogger(object : MixPushLogger {
@@ -46,7 +48,7 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
                 flutterApi?.androidOnRegisterSucceedCallback(AndroidOnRegisterSucceedCallbackArg().apply {
                     platformName = mixPushPlatform?.platformName
                     regId = mixPushPlatform?.regId
-                }){}
+                }) {}
             }
 
             // NOTE 这个函数被调用时，flutter应该是没启动的(?)，因为整个后台可能早就被kill掉了
@@ -57,7 +59,9 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
             }
         })
 
-        mixPushClient.register(context)
+        mixPushClient.register(context, arg!!.androidDefaultPlatform!!)
+
+        Log.i(TAG, "triggerRegister end")
     }
 
     override fun androidGetRegisterId() {

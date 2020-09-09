@@ -57,8 +57,9 @@ dependencies {
     // https://github.com/taoweiji/MixPush
     implementation 'com.mixpush:mixpush-core:2.0.4'// 核心包
     implementation 'com.mixpush:mixpush-mi:2.0.4' // 小米推送
-    implementation 'com.mixpush:mixpush-meizu:2.0.4' // 魅族推送
-    implementation 'com.mixpush:mixpush-huawei:2.0.4' // 华为推送
-    implementation 'com.mixpush:mixpush-oppo:2.0.4' // OPPO推送
-    implementation 'com.mixpush:mixpush-vivo:2.0.4' // VIVO推送
+    // TODO 还没接入！
+//    implementation 'com.mixpush:mixpush-meizu:2.0.4' // 魅族推送
+//    implementation 'com.mixpush:mixpush-huawei:2.0.4' // 华为推送
+//    implementation 'com.mixpush:mixpush-oppo:2.0.4' // OPPO推送
+//    implementation 'com.mixpush:mixpush-vivo:2.0.4' // VIVO推送
 }

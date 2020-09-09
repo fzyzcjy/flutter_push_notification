@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_push_notification/src/messages.dart';
 import 'package:flutter_push_notification/src/utils.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 enum PushPlatform {
   // ios
@@ -15,6 +16,21 @@ enum PushPlatform {
   MEIZU,
   OPPO,
   VIVO,
+}
+
+extension _ExtPushPlatform on PushPlatform {
+  static const _TO_MIX_PUSH_PLATFORM_NAME_MAP = {
+    PushPlatform.MI: 'mi',
+    PushPlatform.HUAWEI: 'huawei',
+    PushPlatform.OPPO: 'oppo',
+    PushPlatform.VIVO: 'vivo',
+    PushPlatform.MEIZU: 'meizu',
+  };
+
+  static PushPlatform fromMixPushPlatformName(String mixPushPlatformName) =>
+      _TO_MIX_PUSH_PLATFORM_NAME_MAP.entries.firstWhere((entry) => entry.value == mixPushPlatformName).key;
+
+  String toMixPushPlatformName() => _TO_MIX_PUSH_PLATFORM_NAME_MAP[this];
 }
 
 @immutable
@@ -57,13 +73,24 @@ abstract class FlutterPushNotification {
     }
   }
 
-  Future<PushDevice> register() {
+  Future<PushDevice> register({PushPlatform androidDefaultPlatform = PushPlatform.MI}) {
     final completer = Completer<PushDevice>();
+
+    // TODO remove, only for debug
+    () async {
+      print('TODO TODO TODO get permission');
+      final statuses = await [Permission.storage, Permission.phone].request();
+      for (final status in statuses.values) {
+        if (status != PermissionStatus.granted) throw Exception("Microphone permission not granted");
+      }
+      print('TODO TODO TODO get permission');
+    }();
 
     _setUpRegisterCallback(completer);
 
-    // even if the hostApi's Future completes, the work is NOT done. Thus do not await this
-    _hostApi.triggerRegister().catchError(completer.completeError);
+    // NOTE even if triggerRegister's Future completes, the process is still NOT finished.
+    final arg = TriggerRegisterArg()..androidDefaultPlatform = androidDefaultPlatform.toMixPushPlatformName();
+    _hostApi.triggerRegister(arg).catchError(completer.completeError);
 
     return completer.future;
   }
@@ -77,21 +104,11 @@ class _AndroidFlutterPushNotification extends FlutterPushNotification {
   @override
   void _setUpRegisterCallback(Completer<PushDevice> completer) {
     _flutterApiHandler._androidOnRegisterSucceedCallback.registerOnce((arg) {
-      completer.complete(PushDevice(platform: _convertPushPlatform(arg.platformName), deviceToken: arg.regId));
+      completer.complete(PushDevice(
+        platform: _ExtPushPlatform.fromMixPushPlatformName(arg.platformName),
+        deviceToken: arg.regId,
+      ));
     });
-  }
-
-  PushPlatform _convertPushPlatform(String mixPushPlatformName) {
-    const _MAP = {
-      'mi': PushPlatform.MI,
-      'huawei': PushPlatform.HUAWEI,
-      'oppo': PushPlatform.OPPO,
-      'vivo': PushPlatform.VIVO,
-      'meizu': PushPlatform.MEIZU,
-    };
-    if (!_MAP.containsKey(mixPushPlatformName))
-      throw Exception('_convertPushPlatform unknown platform: $mixPushPlatformName');
-    return _MAP[mixPushPlatformName];
   }
 }
 

@@ -1,5 +1,9 @@
 import 'package:pigeon/pigeon_lib.dart';
 
+class TriggerRegisterArg {
+  String androidDefaultPlatform;
+}
+
 class IosRegisterCallbackArg {
   bool success;
   String deviceToken;
@@ -19,7 +23,7 @@ class AndroidGetRegisterIdCallbackArg {
 
 @HostApi()
 abstract class FlutterPushNotificationHostApi {
-  void triggerRegister();
+  void triggerRegister(TriggerRegisterArg arg);
 
   // NOTE GetRegisterId是直接读取regid，搭配androidGetRegisterIdCallback; 不同于triggerRegister是调用整个注册流程
   void androidGetRegisterId();

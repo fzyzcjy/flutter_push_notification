@@ -22,6 +22,10 @@ static NSDictionary* wrapResult(NSDictionary *result, FlutterError *error) {
       nil];
 }
 
+@interface FPNTriggerRegisterArg ()
++(FPNTriggerRegisterArg*)fromMap:(NSDictionary*)dict;
+-(NSDictionary*)toMap;
+@end
 @interface FPNIosRegisterCallbackArg ()
 +(FPNIosRegisterCallbackArg*)fromMap:(NSDictionary*)dict;
 -(NSDictionary*)toMap;
@@ -33,6 +37,20 @@ static NSDictionary* wrapResult(NSDictionary *result, FlutterError *error) {
 @interface FPNAndroidGetRegisterIdCallbackArg ()
 +(FPNAndroidGetRegisterIdCallbackArg*)fromMap:(NSDictionary*)dict;
 -(NSDictionary*)toMap;
+@end
+
+@implementation FPNTriggerRegisterArg
++(FPNTriggerRegisterArg*)fromMap:(NSDictionary*)dict {
+  FPNTriggerRegisterArg* result = [[FPNTriggerRegisterArg alloc] init];
+  result.androidDefaultPlatform = dict[@"androidDefaultPlatform"];
+  if ((NSNull *)result.androidDefaultPlatform == [NSNull null]) {
+    result.androidDefaultPlatform = nil;
+  }
+  return result;
+}
+-(NSDictionary*)toMap {
+  return [NSDictionary dictionaryWithObjectsAndKeys:(self.androidDefaultPlatform ? self.androidDefaultPlatform : [NSNull null]), @"androidDefaultPlatform", nil];
+}
 @end
 
 @implementation FPNIosRegisterCallbackArg
@@ -106,7 +124,8 @@ void FPNFlutterPushNotificationHostApiSetup(id<FlutterBinaryMessenger> binaryMes
     if (api) {
       [channel setMessageHandler:^(id _Nullable message, FlutterReply callback) {
         FlutterError *error;
-        [api triggerRegister:&error];
+        FPNTriggerRegisterArg *input = [FPNTriggerRegisterArg fromMap:message];
+        [api triggerRegister:input error:&error];
         callback(wrapResult(nil, error));
       }];
     }
