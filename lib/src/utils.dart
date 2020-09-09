@@ -9,6 +9,7 @@ class OnceFunction<T> {
   }
 
   void callAndRemove(T arg) {
+    print('OnceFunction callAndRemove $arg');
     if (_function != null) print('WARN: OnceCallback _callback==null when call');
     _function?.call(arg);
     _function = null;

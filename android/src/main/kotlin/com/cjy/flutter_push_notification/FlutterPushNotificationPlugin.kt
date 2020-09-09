@@ -67,7 +67,7 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
     override fun androidGetRegisterId() {
         MixPushClient.getInstance().getRegisterId(context, object : GetRegisterIdCallback() {
             override fun callback(platform: MixPushPlatform?): Unit {
-                Log.i("GetRegisterIdCallback", platform.toString())
+                Log.i(TAG, "GetRegisterIdCallback $platform")
 
                 flutterApi!!.androidGetRegisterIdCallback(AndroidGetRegisterIdCallbackArg().apply {
                     success = platform != null

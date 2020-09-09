@@ -6,6 +6,8 @@ import 'package:flutter_push_notification/src/messages.dart';
 import 'package:flutter_push_notification/src/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+const _TAG = 'FlutterPushNotification';
+
 enum PushPlatform {
   // ios
   APNS,
