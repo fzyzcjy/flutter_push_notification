@@ -24,9 +24,6 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
-// https://github.com/taoweiji/MixPush
-apply plugin: 'com.huawei.agconnect'
-
 android {
     compileSdkVersion 28
 
@@ -55,15 +52,16 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     // NOTE hack - only for local development!
-    implementation project(':mixpush-core')
-    implementation project(':mixpush-mi')
+//    implementation project(':mixpush-core')
+//    implementation project(':mixpush-mi')
+//    implementation project(':mixpush-huawei')
 
     // https://github.com/taoweiji/MixPush
-//    implementation 'com.mixpush:mixpush-core:2.0.4'// 核心包
-//    implementation 'com.mixpush:mixpush-mi:2.0.4' // 小米推送
-    // TODO 还没接入！
+    implementation 'com.mixpush:mixpush-core:2.0.4'// 核心包
+    implementation 'com.mixpush:mixpush-mi:2.0.4' // 小米推送
+    implementation 'com.mixpush:mixpush-huawei:2.0.4' // 华为推送
+    // TODO 如下还没接入！
 //    implementation 'com.mixpush:mixpush-meizu:2.0.4' // 魅族推送
-//    implementation 'com.mixpush:mixpush-huawei:2.0.4' // 华为推送
 //    implementation 'com.mixpush:mixpush-oppo:2.0.4' // OPPO推送
 //    implementation 'com.mixpush:mixpush-vivo:2.0.4' // VIVO推送
 }

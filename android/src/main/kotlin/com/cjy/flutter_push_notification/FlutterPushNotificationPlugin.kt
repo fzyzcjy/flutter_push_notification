@@ -112,4 +112,9 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
 
         const val TAG = "FlutterPushNotification"
     }
+
+    // debug get huawei app id
+//    val appId = AGConnectServicesConfig.fromContext(context).getString("client/app_id");
+//    Log.i(TAG, "debug huawei appId: $appId")
+
 }
