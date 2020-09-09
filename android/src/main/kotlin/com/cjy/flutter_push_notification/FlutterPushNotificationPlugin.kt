@@ -1,16 +1,25 @@
 package com.cjy.flutter_push_notification
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.annotation.NonNull
 import com.cjy.flutter_push_notification.Messages.*
 import com.mixpush.core.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.plugin.common.PluginRegistry
 
 /** FlutterPushNotificationPlugin */
-class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHostApi {
+class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHostApi, ActivityAware {
 
     private var context: Context? = null
+
+    // NOTE 关于得到context/activity
+    // https://stackoverflow.com/questions/60048704/how-to-get-activity-and-context-in-flutter-plugin
+    // https://github.com/Sh1d0w/multi_image_picker/blob/master/android/src/main/java/com/vitanov/multiimagepicker/MultiImagePickerPlugin.java#L599
+    private var activity: Activity? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         // ref: https://github.com/flutter/plugins/blob/master/packages/video_player/video_player/android/src/main/java/io/flutter/plugins/videoplayer/VideoPlayerPlugin.java#L210
@@ -23,6 +32,22 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
         FlutterPushNotificationHostApi.setup(binding.binaryMessenger, null)
         flutterApi = null
         context = null
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        activity = binding.activity
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        activity = binding.activity
+    }
+
+    override fun onDetachedFromActivity() {
+        activity = null
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        activity = null
     }
 
     override fun triggerRegister(arg: TriggerRegisterArg?) {
@@ -43,12 +68,16 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
         mixPushClient.setPushReceiver(object : MixPushReceiver() {
             override fun onRegisterSucceed(context: Context?, mixPushPlatform: MixPushPlatform?) {
                 Log.i(TAG, "onRegisterSucceed platform=$mixPushPlatform")
-                if (flutterApi == null) Log.w(TAG, "no flutterApi for callback")
+                activity!!.runOnUiThread {
+                    Log.i(TAG, "onRegisterSucceed runOnUiThread")
 
-                flutterApi?.androidOnRegisterSucceedCallback(AndroidOnRegisterSucceedCallbackArg().apply {
-                    platformName = mixPushPlatform?.platformName
-                    regId = mixPushPlatform?.regId
-                }) {}
+                    if (flutterApi == null) Log.w(TAG, "no flutterApi for callback")
+
+                    flutterApi?.androidOnRegisterSucceedCallback(AndroidOnRegisterSucceedCallbackArg().apply {
+                        platformName = mixPushPlatform?.platformName
+                        regId = mixPushPlatform?.regId
+                    }) {}
+                }
             }
 
             // NOTE 这个函数被调用时，flutter应该是没启动的(?)，因为整个后台可能早就被kill掉了
@@ -82,6 +111,5 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
         var flutterApi: FlutterPushNotificationFlutterApi? = null
 
         const val TAG = "FlutterPushNotification"
-
     }
 }
