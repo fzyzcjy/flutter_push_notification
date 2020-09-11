@@ -25,7 +25,7 @@ import flutter_push_notification
         SwiftFlutterPushNotificationPlugin.hack_application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
     }
     override func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
+        // NOTE: do NOT need super.application(...) for THIS method
         SwiftFlutterPushNotificationPlugin.hack_application(application, didFailToRegisterForRemoteNotificationsWithError: error)
     }
 }

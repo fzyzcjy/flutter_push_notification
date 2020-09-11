@@ -22,8 +22,8 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
         instance = newInstance
     }
     
-    public func iosRegister(_ error: AutoreleasingUnsafeMutablePointer<FlutterError?>) {
-        NSLog("iosRegister start")
+    public func triggerRegister(_ input: FPNTriggerRegisterArg, error: AutoreleasingUnsafeMutablePointer<FlutterError?>) {
+        NSLog("triggerRegister start")
         
         if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, e in
@@ -34,7 +34,7 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
                         UIApplication.shared.registerForRemoteNotifications()
                     }
                 } else {
-                    let r = FPNIosDidRegisterCallbackArg()
+                    let r = FPNIosRegisterCallbackArg()
                     r.success = false
                     r.errorMessage = "Permission is not granted (with optional error: \(String(describing: e))"
                     self.flutterApi.iosRegisterCallback(r, completion: {e in })
@@ -46,13 +46,17 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
         }
     }
     
+    public func androidGetRegisterId(_ error: AutoreleasingUnsafeMutablePointer<FlutterError?>) {
+        error.pointee = FlutterError(code: "flutter_push_notification", message: "unsupported method", details: nil)
+    }
+    
     // TODO 写文档解释，必须在主程序的AppDelegate.swift中加一行调用这个的
     public static func hack_application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         NSLog("didRegisterForRemoteNotificationsWithDeviceToken deviceToken=\(deviceToken)")
         // https://stackoverflow.com/a/24979958/4619958
         let deviceTokenStr = deviceToken.map { String(format: "%02.2hhx", $0) }.joined()
         
-        let r = FPNIosDidRegisterCallbackArg()
+        let r = FPNIosRegisterCallbackArg()
         r.success = true
         r.deviceToken = deviceTokenStr
         instance!.flutterApi.iosRegisterCallback(r, completion: {e in })
@@ -61,7 +65,7 @@ public class SwiftFlutterPushNotificationPlugin: NSObject, FlutterPlugin, FPNFlu
     // TODO 写文档解释，必须在主程序的AppDelegate.swift中加一行调用这个的
     public static func hack_application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         NSLog("didFailToRegisterForRemoteNotificationsWithError \(error)")
-        let r = FPNIosDidRegisterCallbackArg()
+        let r = FPNIosRegisterCallbackArg()
         r.success = false
         r.errorMessage = "\(error)"
         instance!.flutterApi.iosRegisterCallback(r, completion: {e in })
