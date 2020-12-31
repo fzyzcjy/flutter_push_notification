@@ -9,7 +9,6 @@ import com.mixpush.core.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.PluginRegistry
 
 /** FlutterPushNotificationPlugin */
 class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHostApi, ActivityAware {
@@ -53,42 +52,7 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
     override fun triggerRegister(arg: TriggerRegisterArg?) {
         Log.i(TAG, "triggerRegister start")
 
-        val mixPushClient = MixPushClient.getInstance()
-
-        mixPushClient.setLogger(object : MixPushLogger {
-            override fun log(tag: String?, content: String?, throwable: Throwable?) {
-                Log.i(tag, content, throwable);
-            }
-
-            override fun log(tag: String?, content: String?) {
-                Log.i(tag, content);
-            }
-        });
-
-        mixPushClient.setPushReceiver(object : MixPushReceiver() {
-            override fun onRegisterSucceed(context: Context?, mixPushPlatform: MixPushPlatform?) {
-                Log.i(TAG, "onRegisterSucceed platform=$mixPushPlatform")
-                activity!!.runOnUiThread {
-                    Log.i(TAG, "onRegisterSucceed runOnUiThread")
-
-                    if (flutterApi == null) Log.w(TAG, "no flutterApi for callback")
-
-                    flutterApi?.androidOnRegisterSucceedCallback(AndroidOnRegisterSucceedCallbackArg().apply {
-                        platformName = mixPushPlatform?.platformName
-                        regId = mixPushPlatform?.regId
-                    }) {}
-                }
-            }
-
-            // NOTE 这个函数被调用时，flutter应该是没启动的(?)，因为整个后台可能早就被kill掉了
-            override fun onNotificationMessageClicked(context: Context?, message: MixPushMessage?) {
-                Log.i(TAG, "onNotificationMessageClicked message=$message")
-                // TODO 暂时直接打开app，之后修改，比如把message传入flutter等等
-                MixPushClient.getInstance().openApp(context)
-            }
-        })
-
-        mixPushClient.register(context, arg!!.androidDefaultPlatform!!)
+        MixPushClient.getInstance().register(context, arg!!.androidDefaultPlatform!!)
 
         Log.i(TAG, "triggerRegister end")
     }
@@ -110,7 +74,24 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
     companion object {
         var flutterApi: FlutterPushNotificationFlutterApi? = null
 
-        const val TAG = "FlutterPushNotification"
+        private const val TAG = "FlutterPushNotification"
+
+        // NOTE 在android的Application启动时，必须调用这个！否则不会进行任何注册
+        fun handleApplicationOnCreate() {
+            Log.i(TAG, "handleApplicationOnCreate start")
+
+            MixPushClient.getInstance().setLogger(object : MixPushLogger {
+                override fun log(tag: String?, content: String?, throwable: Throwable?) {
+                    Log.i(tag, content, throwable); }
+
+                override fun log(tag: String?, content: String?) {
+                    Log.i(tag, content); }
+            })
+
+            MixPushClient.getInstance().setPushReceiver(MyMixedPushReceiver)
+
+            Log.i(TAG, "handleApplicationOnCreate end")
+        }
     }
 
     // debug get huawei app id
@@ -118,3 +99,4 @@ class FlutterPushNotificationPlugin : FlutterPlugin, FlutterPushNotificationHost
 //    Log.i(TAG, "debug huawei appId: $appId")
 
 }
+
