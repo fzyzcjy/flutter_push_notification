@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_push_notification/src/messages.dart';
 import 'package:flutter_push_notification/src/utils.dart';
 
-const _TAG = 'FlutterPushNotification';
+// const _TAG = 'FlutterPushNotification';
 
 enum PushPlatform {
   // ios
@@ -75,6 +75,8 @@ abstract class FlutterPushNotification {
   }
 
   Future<PushDevice> register({PushPlatform androidDefaultPlatform = PushPlatform.MI}) {
+    print('FlutterPushNotification register');
+
     final completer = Completer<PushDevice>();
 
     _setUpRegisterCallback(completer);
@@ -95,6 +97,7 @@ class _AndroidFlutterPushNotification extends FlutterPushNotification {
   @override
   void _setUpRegisterCallback(Completer<PushDevice> completer) {
     _flutterApiHandler._androidOnRegisterSucceedCallback.registerOnce((arg) {
+      print('FlutterPushNotification _androidOnRegisterSucceedCallback ${arg.platformName} ${arg.regId}');
       completer.complete(PushDevice(
         platform: _ExtPushPlatform.fromMixPushPlatformName(arg.platformName),
         deviceToken: arg.regId,
@@ -109,6 +112,7 @@ class _IOSFlutterPushNotification extends FlutterPushNotification {
   @override
   void _setUpRegisterCallback(Completer<PushDevice> completer) {
     _flutterApiHandler._iosRegisterCallback.registerOnce((arg) {
+      print('FlutterPushNotification _iosRegisterCallback ${arg.success} ${arg.deviceToken} ${arg.errorMessage}');
       if (arg.success) {
         completer.complete(PushDevice(platform: PushPlatform.APNS, deviceToken: arg.deviceToken));
       } else {
