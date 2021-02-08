@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_push_notification/src/messages.dart';
 import 'package:flutter_push_notification/src/utils.dart';
 
-// const _TAG = 'FlutterPushNotification';
+const _TAG = 'FlutterPushNotification';
 
 enum PushPlatform {
   // ios
@@ -74,16 +74,20 @@ abstract class FlutterPushNotification {
     }
   }
 
-  Future<PushDevice> register({PushPlatform androidDefaultPlatform = PushPlatform.MI}) {
-    print('FlutterPushNotification register');
+  Future<PushDevice> register(
+      {PushPlatform androidDefaultPlatform = PushPlatform.MI, Duration timeout = const Duration(seconds: 20)}) {
+    print('$_TAG register start');
 
     final completer = Completer<PushDevice>();
+
+    Future.delayed(timeout).then((_) => completer
+        .completeErrorIfNotCompleted(Exception('register() timeout without receiving any reply'), null, warn: false));
 
     _setUpRegisterCallback(completer);
 
     // NOTE even if triggerRegister's Future completes, the process is still NOT finished.
     final arg = TriggerRegisterArg()..androidDefaultPlatform = androidDefaultPlatform.toMixPushPlatformName();
-    _hostApi.triggerRegister(arg).catchError(completer.completeError);
+    _hostApi.triggerRegister(arg).catchError(completer.completeErrorIfNotCompleted);
 
     return completer.future;
   }
@@ -97,8 +101,8 @@ class _AndroidFlutterPushNotification extends FlutterPushNotification {
   @override
   void _setUpRegisterCallback(Completer<PushDevice> completer) {
     _flutterApiHandler._androidOnRegisterSucceedCallback.registerOnce((arg) {
-      print('FlutterPushNotification _androidOnRegisterSucceedCallback ${arg.platformName} ${arg.regId}');
-      completer.complete(PushDevice(
+      print('$_TAG _androidOnRegisterSucceedCallback ${arg.platformName} ${arg.regId}');
+      completer.completeIfNotCompleted(PushDevice(
         platform: _ExtPushPlatform.fromMixPushPlatformName(arg.platformName),
         deviceToken: arg.regId,
       ));
@@ -112,11 +116,11 @@ class _IOSFlutterPushNotification extends FlutterPushNotification {
   @override
   void _setUpRegisterCallback(Completer<PushDevice> completer) {
     _flutterApiHandler._iosRegisterCallback.registerOnce((arg) {
-      print('FlutterPushNotification _iosRegisterCallback ${arg.success} ${arg.deviceToken} ${arg.errorMessage}');
+      print('$_TAG _iosRegisterCallback ${arg.success} ${arg.deviceToken} ${arg.errorMessage}');
       if (arg.success) {
-        completer.complete(PushDevice(platform: PushPlatform.APNS, deviceToken: arg.deviceToken));
+        completer.completeIfNotCompleted(PushDevice(platform: PushPlatform.APNS, deviceToken: arg.deviceToken));
       } else {
-        completer.completeError(Exception(arg.errorMessage));
+        completer.completeErrorIfNotCompleted(Exception(arg.errorMessage), null);
       }
     });
   }
@@ -137,4 +141,22 @@ class _FlutterApiHandler implements FlutterPushNotificationFlutterApi {
   @override
   void androidOnRegisterSucceedCallback(AndroidOnRegisterSucceedCallbackArg arg) =>
       _androidOnRegisterSucceedCallback.callAndRemove(arg);
+}
+
+extension _ExtCompleter<T> on Completer<T> {
+  void completeIfNotCompleted(T value) {
+    if (isCompleted) {
+      print('WARN want to complete() but already iisCompleted (value=$value)');
+    } else {
+      complete(value);
+    }
+  }
+
+  void completeErrorIfNotCompleted(Object error, StackTrace stackTrace, {bool warn = true}) {
+    if (isCompleted) {
+      if (warn) print('WARN want to completeError() but already iisCompleted (error=$error, stackTrace=$stackTrace)');
+    } else {
+      completeError(error, stackTrace);
+    }
+  }
 }
