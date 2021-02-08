@@ -4,7 +4,7 @@
 
 ### Android
 
-【TODO】
+1. Add line to your proguard rules by reading [this document](https://github.com/taoweiji/MixPush#%E6%B7%B7%E6%B7%86%E9%85%8D%E7%BD%AE)
 
 ### iOS
 
