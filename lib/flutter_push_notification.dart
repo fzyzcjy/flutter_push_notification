@@ -75,13 +75,17 @@ abstract class FlutterPushNotification {
   }
 
   Future<PushDevice> register(
-      {PushPlatform androidDefaultPlatform = PushPlatform.MI, Duration timeout = const Duration(seconds: 20)}) {
+      {PushPlatform androidDefaultPlatform = PushPlatform.MI, Duration timeout = const Duration(seconds: 10)}) {
     print('$_TAG register start');
 
     final completer = Completer<PushDevice>();
 
-    Future.delayed(timeout).then((_) => completer
-        .completeErrorIfNotCompleted(Exception('register() timeout without receiving any reply'), null, warn: false));
+    Future.delayed(timeout).then((_) {
+      if (!completer.isCompleted) {
+        print('$_TAG register timeout');
+        completer.completeError(Exception('register() timeout without receiving any reply'));
+      }
+    });
 
     _setUpRegisterCallback(completer);
 
@@ -152,9 +156,9 @@ extension _ExtCompleter<T> on Completer<T> {
     }
   }
 
-  void completeErrorIfNotCompleted(Object error, StackTrace stackTrace, {bool warn = true}) {
+  void completeErrorIfNotCompleted(Object error, StackTrace stackTrace) {
     if (isCompleted) {
-      if (warn) print('WARN want to completeError() but already iisCompleted (error=$error, stackTrace=$stackTrace)');
+      print('WARN want to completeError() but already iisCompleted (error=$error, stackTrace=$stackTrace)');
     } else {
       completeError(error, stackTrace);
     }
