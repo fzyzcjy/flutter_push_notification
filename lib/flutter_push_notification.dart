@@ -83,7 +83,7 @@ abstract class FlutterPushNotification {
     Future.delayed(timeout).then((_) {
       if (!completer.isCompleted) {
         print('$_TAG register timeout');
-        completer.completeError(Exception('register() timeout without receiving any reply'));
+        completer.completeError(Exception('$_TAG register() timeout without receiving any reply'));
       }
     });
 
