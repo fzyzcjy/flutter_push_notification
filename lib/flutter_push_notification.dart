@@ -28,16 +28,16 @@ extension _ExtPushPlatform on PushPlatform {
     PushPlatform.MEIZU: 'meizu',
   };
 
-  static PushPlatform fromMixPushPlatformName(String mixPushPlatformName) =>
+  static PushPlatform fromMixPushPlatformName(String/*!*/ mixPushPlatformName) =>
       _TO_MIX_PUSH_PLATFORM_NAME_MAP.entries.firstWhere((entry) => entry.value == mixPushPlatformName).key;
 
-  String toMixPushPlatformName() => _TO_MIX_PUSH_PLATFORM_NAME_MAP[this];
+  String/*!*/ toMixPushPlatformName() => _TO_MIX_PUSH_PLATFORM_NAME_MAP[this];
 }
 
 @immutable
 class PushDevice {
-  final PushPlatform platform;
-  final String deviceToken;
+  final PushPlatform/*!*/ platform;
+  final String/*!*/ deviceToken;
 
   PushDevice({this.platform, this.deviceToken});
 
