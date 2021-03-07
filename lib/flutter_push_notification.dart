@@ -28,18 +28,18 @@ extension _ExtPushPlatform on PushPlatform {
     PushPlatform.MEIZU: 'meizu',
   };
 
-  static PushPlatform fromMixPushPlatformName(String/*!*/ mixPushPlatformName) =>
+  static PushPlatform fromMixPushPlatformName(String mixPushPlatformName) =>
       _TO_MIX_PUSH_PLATFORM_NAME_MAP.entries.firstWhere((entry) => entry.value == mixPushPlatformName).key;
 
-  String/*!*/ toMixPushPlatformName() => _TO_MIX_PUSH_PLATFORM_NAME_MAP[this];
+  String toMixPushPlatformName() => _TO_MIX_PUSH_PLATFORM_NAME_MAP[this]!;
 }
 
 @immutable
 class PushDevice {
-  final PushPlatform/*!*/ platform;
-  final String/*!*/ deviceToken;
+  final PushPlatform platform;
+  final String deviceToken;
 
-  PushDevice({this.platform, this.deviceToken});
+  PushDevice({required this.platform, required this.deviceToken});
 
   @override
   bool operator ==(Object other) =>
@@ -56,7 +56,7 @@ class PushDevice {
   String toString() => 'DeviceToken{platform: $platform, deviceToken: $deviceToken}';
 }
 
-_FlutterApiHandler _flutterApiHandler;
+_FlutterApiHandler? _flutterApiHandler;
 
 abstract class FlutterPushNotification {
   final _hostApi = FlutterPushNotificationHostApi();
@@ -104,11 +104,11 @@ class _AndroidFlutterPushNotification extends FlutterPushNotification {
 
   @override
   void _setUpRegisterCallback(Completer<PushDevice> completer) {
-    _flutterApiHandler._androidOnRegisterSucceedCallback.registerOnce((arg) {
+    _flutterApiHandler!._androidOnRegisterSucceedCallback.registerOnce((arg) {
       print('$_TAG _androidOnRegisterSucceedCallback ${arg.platformName} ${arg.regId}');
       completer.completeIfNotCompleted(PushDevice(
-        platform: _ExtPushPlatform.fromMixPushPlatformName(arg.platformName),
-        deviceToken: arg.regId,
+        platform: _ExtPushPlatform.fromMixPushPlatformName(arg.platformName!),
+        deviceToken: arg.regId!,
       ));
     });
   }
@@ -119,10 +119,10 @@ class _IOSFlutterPushNotification extends FlutterPushNotification {
 
   @override
   void _setUpRegisterCallback(Completer<PushDevice> completer) {
-    _flutterApiHandler._iosRegisterCallback.registerOnce((arg) {
+    _flutterApiHandler!._iosRegisterCallback.registerOnce((arg) {
       print('$_TAG _iosRegisterCallback ${arg.success} ${arg.deviceToken} ${arg.errorMessage}');
-      if (arg.success) {
-        completer.completeIfNotCompleted(PushDevice(platform: PushPlatform.APNS, deviceToken: arg.deviceToken));
+      if (arg.success!) {
+        completer.completeIfNotCompleted(PushDevice(platform: PushPlatform.APNS, deviceToken: arg.deviceToken!));
       } else {
         completer.completeErrorIfNotCompleted(Exception(arg.errorMessage), null);
       }
@@ -156,7 +156,7 @@ extension _ExtCompleter<T> on Completer<T> {
     }
   }
 
-  void completeErrorIfNotCompleted(Object error, StackTrace stackTrace) {
+  void completeErrorIfNotCompleted(Object error, StackTrace? stackTrace) {
     if (isCompleted) {
       print('WARN want to completeError() but already iisCompleted (error=$error, stackTrace=$stackTrace)');
     } else {

@@ -1,24 +1,24 @@
 import 'package:pigeon/pigeon_lib.dart';
 
 class TriggerRegisterArg {
-  String androidDefaultPlatform;
+  String? androidDefaultPlatform;
 }
 
 class IosRegisterCallbackArg {
-  bool success;
-  String deviceToken;
-  String errorMessage;
+  bool? success;
+  String? deviceToken;
+  String? errorMessage;
 }
 
 class AndroidOnRegisterSucceedCallbackArg {
-  String platformName;
-  String regId;
+  String? platformName;
+  String? regId;
 }
 
 class AndroidGetRegisterIdCallbackArg {
-  bool success;
-  String platformName;
-  String regId;
+  bool? success;
+  String? platformName;
+  String? regId;
 }
 
 @HostApi()
