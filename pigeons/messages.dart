@@ -1,3 +1,4 @@
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:pigeon/pigeon_lib.dart';
 
 class TriggerRegisterArg {
